@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KrishiSahayak — WhatsApp Bot</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#111b21;height:100vh;display:flex;align-items:center;justify-content:center}
+  .wa-container{width:430px;height:96vh;max-height:800px;background:#111b21;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #2a3942}
+  .wa-header{background:#202c33;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;border-bottom:1px solid #2a3942}
+  .wa-avatar{width:40px;height:40px;border-radius:50%;background:#1D9E75;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+  .wa-header-info{flex:1}
+  .wa-header-name{font-size:15px;font-weight:600;color:#e9edef}
+  .wa-header-status{font-size:12px;color:#00a884;margin-top:1px}
+  .wa-header-icons{display:flex;gap:20px}
+  .wa-header-icons svg{width:20px;height:20px;fill:#aebac1;cursor:pointer}
+  .wa-chat{flex:1;overflow-y:auto;padding:16px 12px;background:#0b141a;display:flex;flex-direction:column;gap:6px}
+  .wa-chat::-webkit-scrollbar{width:4px}
+  .wa-chat::-webkit-scrollbar-thumb{background:#2a3942;border-radius:2px}
+  .date-divider{text-align:center;margin:8px 0}
+  .date-divider span{background:#182229;color:#8696a0;font-size:11px;padding:4px 10px;border-radius:6px}
+  .bubble-row{display:flex;flex-direction:column;max-width:85%}
+  .bubble-row.bot{align-self:flex-start}
+  .bubble-row.user{align-self:flex-end}
+  .bubble{padding:8px 12px;border-radius:8px;font-size:13px;line-height:1.55;word-break:break-word}
+  .bubble.bot{background:#202c33;color:#e9edef;border-top-left-radius:2px}
+  .bubble.user{background:#005c4b;color:#e9edef;border-top-right-radius:2px}
+  .bubble-time{font-size:10px;color:#8696a0;margin-top:3px;display:flex;align-items:center;gap:3px}
+  .bubble-row.user .bubble-time{justify-content:flex-end}
+  .tick{color:#53bdeb}
+  .typing-bubble{background:#202c33;border-radius:8px;border-top-left-radius:2px;padding:12px 16px;align-self:flex-start;display:none}
+  .typing-dots{display:flex;gap:4px;align-items:center}
+  .typing-dots span{width:7px;height:7px;border-radius:50%;background:#8696a0;animation:bounce 1.2s infinite}
+  .typing-dots span:nth-child(2){animation-delay:.2s}
+  .typing-dots span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+  .badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:999px;margin:3px 3px 0 0}
+  .badge-green{background:#1D9E75;color:#fff}
+  .badge-gray{background:#2a3942;color:#8696a0;border:1px solid #3a4a52}
+  .badge-amber{background:#854F0B;color:#FAC775}
+  .conf-bar-wrap{margin:5px 0;background:#2a3942;border-radius:4px;height:5px;overflow:hidden}
+  .conf-bar{height:100%;border-radius:4px;transition:width 0.8s ease}
+  .steps-list{margin:5px 0;display:flex;flex-direction:column;gap:4px}
+  .step-item{display:flex;gap:7px;align-items:flex-start;font-size:12px}
+  .step-num{width:17px;height:17px;border-radius:50%;background:#1D9E75;color:#fff;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .irr-table{width:100%;border-collapse:collapse;margin:5px 0;font-size:11px}
+  .irr-table th{color:#8696a0;font-weight:500;padding:3px 5px;text-align:left;border-bottom:1px solid #2a3942}
+  .irr-table td{padding:3px 5px;color:#e9edef}
+  .irr-table tr.irrigate td{color:#1D9E75}
+  .irr-table tr.skip td{color:#8696a0}
+  .irr-table tr.monitor td{color:#EF9F27}
+  .irr-table tr.drain td{color:#534AB7}
+  .bubble-divider{height:1px;background:#2a3942;margin:7px 0}
+  .bubble-section-label{font-size:10px;font-weight:600;color:#8696a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+  .lang-bar{display:flex;gap:5px;margin:8px 0 4px}
+  .lang-btn{font-size:10px;padding:3px 10px;border-radius:999px;border:1px solid #3a4a52;background:transparent;color:#8696a0;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+  .lang-btn.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+  .wa-input-area{background:#202c33;padding:10px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-top:1px solid #2a3942}
+  .wa-input-wrap{flex:1;background:#2a3942;border-radius:24px;display:flex;align-items:center;padding:8px 14px;gap:10px}
+  .wa-input{flex:1;background:transparent;border:none;outline:none;color:#e9edef;font-size:14px;font-family:'Inter',sans-serif}
+  .wa-input::placeholder{color:#8696a0}
+  .wa-icon-btn{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center}
+  .wa-icon-btn svg{width:20px;height:20px;fill:#8696a0}
+  .wa-round-btn{width:44px;height:44px;border-radius:50%;background:#1D9E75;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+  .wa-round-btn:hover{background:#0F6E56}
+  .wa-round-btn svg{width:20px;height:20px;fill:#fff}
+  .wa-round-btn.recording{background:#E24B4A;animation:pulse-mic 1s infinite}
+  @keyframes pulse-mic{0%,100%{opacity:1}50%{opacity:.6}}
+  .offline-banner{background:#182229;padding:5px 16px;text-align:center;font-size:11px;color:#1D9E75;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:6px}
+  .offline-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;animation:pdot 2s infinite}
+  @keyframes pdot{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div class="wa-container">
+
+  <div class="offline-banner">
+    <div class="offline-dot"></div>
+    <span id="banner-text">Offline Mode Active — KrishiSahayak works without internet</span>
+  </div>
+
+  <div class="wa-header">
+    <div class="wa-avatar">🌾</div>
+    <div class="wa-header-info">
+      <div class="wa-header-name" id="bot-name">KrishiSahayak AI</div>
+      <div class="wa-header-status" id="header-status">online</div>
+    </div>
+    <div class="wa-header-icons">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </div>
+  </div>
+
+  <div class="wa-chat" id="chatArea">
+    <div class="date-divider"><span id="date-label">Today</span></div>
+
+    <div class="bubble-row bot">
+      <div class="bubble bot" id="welcome-bubble">
+        Namaskar! Main <strong>KrishiSahayak AI</strong> hoon. 🌾<br><br>
+        Apni fasal ki photo bhejein ya apni samasya batayein.<br>
+        Main aapko turant salah dunga.<br><br>
+        <span style="color:#8696a0;font-size:12px">Hello! I am KrishiSahayak AI. Send a crop photo or describe your problem. I will give instant advice.</span>
+        <br><br>
+        <span class="badge badge-gray">🔒 Offline Ready</span>
+        <span class="badge badge-green">🌿 Federated AI</span>
+      </div>
+      <div class="bubble-time">9:41 AM</div>
+    </div>
+
+    <div class="bubble-row user">
+      <div class="bubble user">Mere gehu ke patte pe peele daag aa rahe hain 🌿</div>
+      <div class="bubble-time">9:42 AM <span class="tick">✓✓</span></div>
+    </div>
+
+    <div class="bubble-row bot" id="preloaded-bot-bubble">
+      <div class="bubble bot" id="preloaded-content">
+        <div class="bubble-section-label">Detection Result</div>
+        🔍 <strong>Wheat Leaf Rust / गेहूं पत्ती रतुआ</strong><br>
+        Confidence: <strong style="color:#EF9F27">81%</strong>
+        <div class="conf-bar-wrap"><div class="conf-bar" style="width:81%;background:#EF9F27"></div></div>
+        <div class="bubble-divider"></div>
+        <div class="bubble-section-label">Kya karein / What to do</div>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num">1</div><span>Apply Mancozeb fungicide at 2.5g per litre / मैनकोज़ेब 2.5g/L में मिलाएं</span></div>
+          <div class="step-item"><div class="step-num">2</div><span>Avoid irrigation for 2 days / 2 दिन सिंचाई न करें</span></div>
+          <div class="step-item"><div class="step-num">3</div><span>Re-inspect after 5 days / 5 दिन बाद जाँचें</span></div>
+        </div>
+        <div class="bubble-divider"></div>
+        <div class="bubble-section-label">7-Day Irrigation</div>
+        <table class="irr-table">
+          <tr><th>Day</th><th>Action</th><th>Water</th></tr>
+          <tr class="skip"><td>Mon</td><td>Skip / छोड़ें</td><td>—</td></tr>
+          <tr class="skip"><td>Tue</td><td>Skip / छोड़ें</td><td>—</td></tr>
+          <tr class="irrigate"><td>Wed</td><td>Irrigate / सिंचाई</td><td>20mm</td></tr>
+          <tr class="skip"><td>Thu</td><td>Skip / छोड़ें</td><td>—</td></tr>
+          <tr class="monitor"><td>Fri</td><td>Monitor / निगरानी</td><td>—</td></tr>
+          <tr class="irrigate"><td>Sat</td><td>Irrigate / सिंचाई</td><td>18mm</td></tr>
+          <tr class="skip"><td>Sun</td><td>Rest / विश्राम</td><td>—</td></tr>
+        </table>
+        <div class="bubble-divider"></div>
+        <div style="font-size:11.5px;color:#8696a0">
+          ⚠️ Bina ilaaj / Without treatment: <span style="color:#E24B4A">19 quintals/acre</span><br>
+          ✅ Ilaaj ke baad / With treatment: <span style="color:#1D9E75">28 quintals/acre</span>
+        </div>
+        <br>
+        <span class="badge badge-green">✓ Offline Mode</span>
+        <span class="badge badge-amber">हिंदी + English</span>
+        <br>
+        <div style="font-size:10px;color:#8696a0;margin-top:5px">🔒 Model trained across 847 farms. Your data never left your device.</div>
+      </div>
+      <div class="bubble-time">9:43 AM</div>
+    </div>
+  </div>
+
+  <div class="typing-bubble" id="typingIndicator">
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="wa-input-area">
+    <div class="wa-input-wrap">
+      <button class="wa-icon-btn" title="Emoji">
+        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+      </button>
+      <input class="wa-input" id="msgInput" type="text"
+        placeholder="Type crop problem..."
+        onkeydown="if(event.key==='Enter')sendMessage()"/>
+      <button class="wa-icon-btn" title="Attach photo" onclick="triggerUpload()">
+        <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+      </button>
+    </div>
+    <button class="wa-round-btn" id="micBtn" onclick="toggleMic()">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+    </button>
+    <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleUpload(event)"/>
+    <button class="wa-round-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:8000";
+let lang = "both";
+let isRec = false;
+
+function t(en, hi) {
+  if (lang === "en") return en;
+  if (lang === "hi") return hi;
+  return `${en} / ${hi}`;
+}
+
+function getNow() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function scrollDown() {
+  const c = document.getElementById("chatArea");
+  c.scrollTop = c.scrollHeight;
+}
+
+function showTyping() {
+  document.getElementById("typingIndicator").style.display = "block";
+  document.getElementById("header-status").textContent = lang === "hi" ? "टाइप कर रहा है..." : "typing...";
+  document.getElementById("header-status").style.color = "#8696a0";
+  scrollDown();
+}
+
+function hideTyping() {
+  document.getElementById("typingIndicator").style.display = "none";
+  document.getElementById("header-status").textContent = lang === "hi" ? "ऑनलाइन" : "online";
+  document.getElementById("header-status").style.color = "#00a884";
+}
+
+function addUserBubble(html) {
+  const chat = document.getElementById("chatArea");
+  const row = document.createElement("div");
+  row.className = "bubble-row user";
+  row.innerHTML = `<div class="bubble user">${html}</div><div class="bubble-time">${getNow()} <span class="tick">✓✓</span></div>`;
+  chat.appendChild(row);
+  scrollDown();
+}
+
+function confColor(c) {
+  const p = c * 100;
+  return p >= 85 ? "#E24B4A" : p >= 70 ? "#EF9F27" : "#1D9E75";
+}
+
+function actionClass(a) {
+  const map = {
+    "Skip":"skip","Rest":"skip","Drain partial":"drain",
+    "Irrigate":"irrigate","Refill":"irrigate",
+    "Monitor":"monitor","Drip only":"monitor","Reduce":"monitor"
+  };
+  return map[a] || "skip";
+}
+
+function buildBubble(data) {
+  const pred  = data.prediction;
+  const rec   = data.recommendation;
+  const fore  = data.forecast;
+  const sched = fore.irrigation_schedule || [];
+  const conf  = pred.confidence;
+  const pct   = Math.round(conf * 100);
+  const cc    = confColor(conf);
+
+  const diseaseName = lang === "hi"
+    ? pred.disease_hi
+    : lang === "en"
+    ? pred.disease
+    : `${pred.disease} / ${pred.disease_hi}`;
+
+  const adviceText = lang === "hi"
+    ? rec.text_hi
+    : lang === "en"
+    ? rec.text_en
+    : `${rec.text_en}<br><em style="color:#8696a0;font-size:11.5px">${rec.text_hi}</em>`;
+
+  const reasoningText = lang === "hi"
+    ? rec.reasoning_hi
+    : lang === "en"
+    ? rec.reasoning_en
+    : `${rec.reasoning_en}<br><em style="color:#8696a0;font-size:10.5px">${rec.reasoning_hi}</em>`;
+
+  const irrAdvice = lang === "hi"
+    ? fore.irrigation_advice_hi
+    : lang === "en"
+    ? fore.irrigation_advice_en
+    : `${fore.irrigation_advice_en} / ${fore.irrigation_advice_hi}`;
+
+  const fedNote = lang === "hi"
+    ? data.federated_note_hi
+    : lang === "en"
+    ? data.federated_note_en
+    : data.federated_note_en;
+
+  const stepsHtml = (rec.steps || []).map((s, i) => {
+    const stepText = lang === "hi"
+      ? s.hi
+      : lang === "en"
+      ? s.en
+      : `${s.en} / ${s.hi}`;
+    return `<div class="step-item"><div class="step-num">${i+1}</div><span>${stepText}</span></div>`;
+  }).join("");
+
+  const schedHtml = sched.slice(0, 7).map(r => {
+    const day  = lang === "hi" ? r.date_hi   : r.date;
+    const act  = lang === "hi" ? r.action_hi : lang === "en" ? r.action_en : `${r.action_en} / ${r.action_hi}`;
+    const cls  = actionClass(r.action_en);
+    return `<tr class="${cls}"><td>${day}</td><td>${act}</td><td>${r.amount_mm > 0 ? r.amount_mm+"mm" : "—"}</td></tr>`;
+  }).join("");
+
+  const sevLabel = lang === "hi"
+    ? (pred.severity === "high" ? "उच्च गंभीरता" : "मध्यम")
+    : (pred.severity === "high" ? "High Severity" : "Moderate");
+  const sevColor = pred.severity === "high" ? "#E24B4A" : "#EF9F27";
+
+  const yieldWithout = fore.yield_prediction?.without_treatment ?? "—";
+  const yieldWith    = fore.yield_prediction?.with_treatment    ?? "—";
+
+  const yieldLabel1 = lang === "hi" ? "बिना इलाज" : lang === "en" ? "Without treatment" : "Without / बिना इलाज";
+  const yieldLabel2 = lang === "hi" ? "इलाज के बाद" : lang === "en" ? "With treatment"    : "With / इलाज के बाद";
+
+  return `
+    <div class="bubble-section-label">${t("Detection Result","पहचान परिणाम")}</div>
+    🔍 <strong>${diseaseName}</strong>
+    <span class="badge" style="background:${sevColor};color:#fff">${sevLabel}</span><br>
+    ${t("Confidence","विश्वास")}: <strong style="color:${cc}">${pct}%</strong>
+    <div class="conf-bar-wrap"><div class="conf-bar" style="width:${pct}%;background:${cc}"></div></div>
+    <div style="font-size:10.5px;color:#8696a0;margin-top:2px">
+      ${(pred.top_predictions || []).slice(1).map(p => `${p.disease}: ${Math.round(p.confidence*100)}%`).join(" · ")}
+    </div>
+
+    <div class="bubble-divider"></div>
+    <div class="bubble-section-label">${t("Recommendation","सुझाव")}</div>
+    <div style="font-size:12.5px;color:#e9edef;margin-bottom:5px">${adviceText}</div>
+    <div class="steps-list">${stepsHtml}</div>
+
+    <div class="bubble-divider"></div>
+    <div class="bubble-section-label">${t("Why AI said this","AI ने यह क्यों कहा")}</div>
+    <div style="font-size:11px;color:#8696a0;font-style:italic">${reasoningText}</div>
+
+    <div class="bubble-divider"></div>
+    <div class="bubble-section-label">${t("7-Day Irrigation Plan","7 दिन की सिंचाई योजना")}</div>
+    <div style="font-size:10.5px;color:#8696a0;margin-bottom:4px">${irrAdvice}</div>
+    <table class="irr-table">
+      <tr>
+        <th>${t("Day","दिन")}</th>
+        <th>${t("Action","कार्य")}</th>
+        <th>${t("Water","पानी")}</th>
+      </tr>
+      ${schedHtml}
+    </table>
+
+    <div class="bubble-divider"></div>
+    <div style="font-size:11.5px;color:#8696a0">
+      ⚠️ ${yieldLabel1}: <span style="color:#E24B4A">${yieldWithout} quintals/acre</span><br>
+      ✅ ${yieldLabel2}: <span style="color:#1D9E75">${yieldWith} quintals/acre</span>
+    </div>
+    <div style="font-size:11px;color:#8696a0;margin-top:5px">
+      💧 ${t("Water saved","बचाया पानी")}: <span style="color:#1D9E75">${data.sustainability?.water_saved_litres ?? 2400}L</span>
+      &nbsp; 💰 ${t("Protected","बचाई राशि")}: <span style="color:#1D9E75">₹${(data.sustainability?.economic_protection_inr ?? 42000).toLocaleString()}</span>
+    </div>
+
+    <div class="bubble-divider"></div>
+    <div class="lang-bar">
+      <button class="lang-btn ${lang==='en'?'active':''}" onclick="switchLang('en',this)">English</button>
+      <button class="lang-btn ${lang==='hi'?'active':''}" onclick="switchLang('hi',this)">हिंदी</button>
+      <button class="lang-btn ${lang==='both'?'active':''}" onclick="switchLang('both',this)">Both</button>
+    </div>
+    <span class="badge badge-green">✓ ${t("Offline Mode","ऑफलाइन मोड")}</span>
+    <br>
+    <div style="font-size:10px;color:#8696a0;margin-top:5px">🔒 ${fedNote}</div>
+  `;
+}
+
+function addBotBubble(data) {
+  const chat = document.getElementById("chatArea");
+  const row  = document.createElement("div");
+  row.className = "bubble-row bot";
+  row.dataset.apiData = JSON.stringify(data);
+  row.innerHTML = `<div class="bubble bot">${buildBubble(data)}</div><div class="bubble-time">${getNow()}</div>`;
+  chat.appendChild(row);
+  scrollDown();
+}
+
+function addErrBubble(msg) {
+  const chat = document.getElementById("chatArea");
+  const row  = document.createElement("div");
+  row.className = "bubble-row bot";
+  row.innerHTML = `<div class="bubble bot"><span style="color:#E24B4A">⚠️ ${msg}</span></div><div class="bubble-time">${getNow()}</div>`;
+  chat.appendChild(row);
+  scrollDown();
+}
+
+function switchLang(newLang, btn) {
+  lang = newLang;
+  updateUILang();
+  document.querySelectorAll(".bubble-row.bot[data-api-data]").forEach(row => {
+    const data = JSON.parse(row.dataset.apiData);
+    row.querySelector(".bubble").innerHTML = buildBubble(data);
+  });
+  scrollDown();
+}
+
+function updateUILang() {
+  document.getElementById("header-status").textContent = lang === "hi" ? "ऑनलाइन" : "online";
+  document.getElementById("banner-text").textContent = lang === "hi"
+    ? "ऑफलाइन मोड सक्रिय — KrishiSahayak बिना इंटरनेट काम करता है"
+    : "Offline Mode Active — KrishiSahayak works without internet";
+  document.getElementById("msgInput").placeholder = lang === "hi"
+    ? "फसल की समस्या लिखें..."
+    : "Type crop problem...";
+  document.getElementById("date-label").textContent = lang === "hi" ? "आज" : "Today";
+}
+
+async function callAPI(file) {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${API}/predict-disease`, { method: "POST", body: fd });
+  if (!res.ok) throw new Error(res.status);
+  return res.json();
+}
+
+async function sendMessage() {
+  const inp  = document.getElementById("msgInput");
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = "";
+  addUserBubble(text);
+  showTyping();
+  await new Promise(r => setTimeout(r, 1800));
+  hideTyping();
+  const mock = new File(
+    [new Uint8Array(Math.floor(Math.random()*5000)+500).map(()=>Math.random()*255)],
+    "crop.jpg", { type: "image/jpeg" }
+  );
+  try {
+    const data = await callAPI(mock);
+    addBotBubble(data);
+  } catch {
+    addErrBubble(lang === "hi"
+      ? "सर्वर से कनेक्ट नहीं हो सका। बैकएंड पोर्ट 8000 पर चला रहे हैं?"
+      : "Could not connect to backend. Is it running on port 8000?");
+  }
+}
+
+async function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  addUserBubble(`📷 <em style="color:#8696a0">${file.name}</em>`);
+  showTyping();
+  await new Promise(r => setTimeout(r, 2000));
+  hideTyping();
+  try {
+    const data = await callAPI(file);
+    addBotBubble(data);
+  } catch {
+    addErrBubble(lang === "hi"
+      ? "सर्वर से कनेक्ट नहीं हो सका।"
+      : "Could not connect to backend. Is it running on port 8000?");
+  }
+  e.target.value = "";
+}
+
+function triggerUpload() {
+  document.getElementById("imgInput").click();
+}
+
+function toggleMic() {
+  const btn = document.getElementById("micBtn");
+  const inp = document.getElementById("msgInput");
+  if (!isRec) {
+    isRec = true;
+    btn.classList.add("recording");
+    const phrases = [
+      "Mere gehu ke patte pe peele daag aa rahe hain",
+      "Tamatar ke paudhon mein kala daag hai",
+      "Chawal ki fasal theek nahi lag rahi",
+      "Aloo ke patte sookh rahe hain",
+      "My tomato leaves have black spots",
+      "Rice crop is not looking healthy"
+    ];
+    const picked = phrases[Math.floor(Math.random() * phrases.length)];
+    setTimeout(() => {
+      isRec = false;
+      btn.classList.remove("recording");
+      inp.value = picked;
+      inp.focus();
+    }, 2000);
+  } else {
+    isRec = false;
+    btn.classList.remove("recording");
+  }
+}
+
+scrollDown();
+</script>
+</body>
+</html>
