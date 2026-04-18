@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KrishiSahayak – AI Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --g900:#0a2a14;--g800:#14401f;--g700:#1b5a2c;--g600:#22763a;
+  --g500:#2a9348;--g400:#3db862;--g300:#6dd68a;--g100:#d4f5dc;--g50:#f0faf3;
+  --amber:#f59e0b;--amber-l:#fef3c7;--red:#dc2626;--red-l:#fee2e2;
+  --blue:#2563eb;--blue-l:#dbeafe;
+  --bg:#f1f5f2;--surface:#ffffff;--surface2:#f8faf8;
+  --border:#e5e7eb;--text1:#111827;--text2:#374151;--text3:#6b7280;--text4:#9ca3af;
+  --sidebar-w:212px;--header-h:56px;--radius:10px;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05);
+}
+[data-theme="dark"] {
+  --bg:#0d1a10;--surface:#152019;--surface2:#1a2a1e;--border:#1f3325;
+  --text1:#f0faf3;--text2:#c8e6cc;--text3:#86ab8c;--text4:#4a7355;
+  --g50:#0f2215;--g100:#163320;--amber-l:#2d2000;--blue-l:#0d1a3a;--red-l:#2d0a0a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text1);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+
+.header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 18px;gap:16px;transition:background .3s,border-color .3s}
+.logo{display:flex;align-items:center;gap:9px;min-width:var(--sidebar-w)}
+.logo-icon{width:32px;height:32px;background:var(--g700);border-radius:8px;display:grid;place-items:center}
+.logo-icon svg{width:18px;height:18px;fill:white}
+.logo-text h1{font-size:.95rem;font-weight:700;color:var(--g800);line-height:1.1}
+[data-theme=dark] .logo-text h1{color:var(--g300)}
+.logo-text p{font-size:.62rem;color:var(--text4);letter-spacing:.03em}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 12px;border-radius:6px;font-size:.78rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;border:none;background:none}
+.nav-tab:hover{background:var(--surface2);color:var(--text1)}
+.nav-tab.active{background:var(--g50);color:var(--g700);font-weight:600}
+[data-theme=dark] .nav-tab.active{background:var(--g100);color:var(--g300)}
+.nav-tab svg{width:13px;height:13px;stroke:currentColor;fill:none}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.dark-toggle{width:36px;height:20px;border-radius:99px;background:var(--border);position:relative;cursor:pointer;border:none;transition:background .3s;flex-shrink:0}
+.dark-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);transition:transform .3s,background .3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+[data-theme=dark] .dark-toggle{background:var(--g600)}
+[data-theme=dark] .dark-toggle::after{transform:translateX(16px)}
+.toggle-icons{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text3)}
+.user-badge{display:flex;align-items:center;gap:8px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--g600);display:grid;place-items:center;font-size:.8rem;font-weight:700;color:white;flex-shrink:0}
+.user-info p{font-size:.8rem;font-weight:600;color:var(--text1)}
+.user-info span{font-size:.65rem;color:var(--text4)}
+
+.sidebar{position:fixed;left:0;top:var(--header-h);bottom:0;width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:10px 8px;overflow-y:auto;z-index:100;transition:background .3s,border-color .3s}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:.8rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left}
+.sidebar-item svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none}
+.sidebar-item:hover{background:var(--surface2);color:var(--text1)}
+.sidebar-item.active{background:var(--g50);color:var(--g700);font-weight:600}
+[data-theme=dark] .sidebar-item.active{background:var(--g100);color:var(--g300)}
+.sidebar-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.device-card,.federated-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;transition:background .3s}
+.device-card h4,.federated-card h4{font-size:.65rem;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.device-name{font-size:.78rem;font-weight:600;color:var(--text1);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--g400);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.online-badge{font-size:.65rem;color:var(--g500);font-weight:600;margin-top:3px}
+.fed-status{font-size:.72rem;color:var(--text3)}
+.fed-bar-wrap{background:var(--border);border-radius:99px;height:5px;margin:6px 0 4px;overflow:hidden}
+.fed-bar{background:linear-gradient(90deg,var(--g500),var(--g300));height:100%;border-radius:99px;width:78%;animation:barGrow 1.5s ease}
+@keyframes barGrow{from{width:0}to{width:78%}}
+.fed-sync{font-size:.62rem;color:var(--text4)}
+
+.main{margin-left:var(--sidebar-w);margin-top:var(--header-h);padding:14px;min-height:calc(100vh - var(--header-h))}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .4s ease both;transition:background .3s,box-shadow .2s}
+.card:hover{box-shadow:0 4px 24px rgba(0,0,0,.1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.1s}
+.card:nth-child(3){animation-delay:.15s}.card:nth-child(4){animation-delay:.2s}
+.card-header{padding:11px 14px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:border-color .3s}
+.card-title{font-size:.78rem;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:7px}
+.card-title svg{width:14px;height:14px;stroke:var(--g600);fill:none}
+.card-body{padding:12px 14px}
+
+.leaf-zone{width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;margin-bottom:10px;position:relative;cursor:pointer;transition:transform .2s}
+.leaf-zone:hover{transform:scale(1.01)}
+.leaf-placeholder{width:100%;height:100%;background:linear-gradient(135deg,#0a2a14,#1b5a2c,#2a7a3c,#6dd68a);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
+.leaf-placeholder::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.05),transparent 60%)}
+.leaf-uploaded{width:100%;height:100%;object-fit:cover;display:none}
+.spot{position:absolute;border-radius:50%;background:radial-gradient(circle,#f59e0b88,#dc262644);animation:spotPulse 3s ease-in-out infinite}
+@keyframes spotPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}}
+.spot:nth-child(1){width:18px;height:18px;top:30%;left:35%}
+.spot:nth-child(2){width:13px;height:13px;top:45%;left:56%;animation-delay:.8s}
+.spot:nth-child(3){width:16px;height:16px;top:62%;left:30%;animation-delay:1.5s}
+.spot:nth-child(4){width:10px;height:10px;top:22%;left:62%;animation-delay:.3s}
+.leaf-icon{width:56px;height:56px;stroke:rgba(255,255,255,.6);fill:none;position:relative;z-index:1}
+.leaf-hint{font-size:.72rem;color:rgba(255,255,255,.6);position:relative;z-index:1}
+.file-input{display:none}
+.upload-btn{width:100%;padding:8px;border-radius:7px;background:var(--g700);color:white;font-size:.78rem;font-weight:600;letter-spacing:.02em;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.upload-btn:hover{background:var(--g800);transform:translateY(-1px);box-shadow:0 4px 12px rgba(22,100,50,.3)}
+.upload-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.upload-hint{font-size:.63rem;color:var(--text4);margin-top:6px;text-align:center}
+
+.disease-name{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--red);font-weight:700;line-height:1.2}
+.disease-sci{font-size:.68rem;color:var(--text4);font-style:italic;margin-bottom:10px}
+.conf-label{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text3);margin-bottom:5px}
+.conf-label span:last-child{font-weight:700;color:var(--text1);font-size:.85rem}
+.conf-bar{height:8px;border-radius:99px;background:var(--border);overflow:hidden;cursor:pointer;position:relative}
+.conf-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--g500),var(--amber),var(--red));width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.conf-tooltip{position:absolute;top:-28px;background:var(--text1);color:var(--surface);font-size:.62rem;padding:3px 8px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;transform:translateX(-50%)}
+.conf-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--text1)}
+.disease-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.meta-item label{font-size:.62rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text4);display:block;margin-bottom:2px}
+.meta-item .val{font-size:.88rem;font-weight:700}
+.severity-high{color:var(--red)}
+.severity-moderate{color:var(--amber)}
+.listen-btn{margin-top:11px;width:100%;padding:8px;border-radius:7px;background:var(--g700);color:white;font-size:.78rem;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.2s}
+.listen-btn:hover{background:var(--g800)}
+.listen-btn.speaking{background:#0d9488;animation:speakPulse 1s ease-in-out infinite}
+@keyframes speakPulse{0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.5)}50%{box-shadow:0 0 0 8px rgba(13,148,136,0)}}
+
+.heatmap-wrap{width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;position:relative;margin-bottom:8px;background:radial-gradient(ellipse at 55% 45%,#dc2626cc,#f59e0baa,#22c55e66,#2563eb44,#1b5a2c);cursor:crosshair}
+.heatmap-cursor{position:absolute;pointer-events:none;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),transparent);transform:translate(-50%,-50%);opacity:0;transition:opacity .2s}
+.heatmap-tooltip{position:absolute;background:rgba(0,0,0,.75);color:white;font-size:.62rem;padding:4px 8px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;font-family:'Space Mono',monospace}
+
+.section-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text4);margin-bottom:7px}
+.weather-row,.soil-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:.76rem;transition:border-color .3s}
+.weather-row:last-child,.soil-row:last-child{border-bottom:none}
+.weather-row .label{display:flex;align-items:center;gap:6px;color:var(--text3)}
+.weather-row .label svg{width:12px;height:12px;stroke:var(--text4);fill:none}
+.weather-row .value,.soil-val{font-weight:600;color:var(--text1)}
+.soil-label{color:var(--text3)}
+.soil-high{color:var(--red)}.soil-med{color:var(--amber)}.soil-ok{color:var(--g600)}
+
+.ndvi-map{width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;margin-bottom:8px;background:radial-gradient(ellipse at 30% 50%,#b45309,#1b5a2c 40%,#166534 80%,#052e16);position:relative;cursor:crosshair}
+.ndvi-map::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 60% 30%,#4ade8044 25%,transparent 50%),radial-gradient(circle at 25% 70%,#86efac33 20%,transparent 45%),radial-gradient(circle at 80% 70%,#fde04755 15%,transparent 35%)}
+.ndvi-hover-tip{position:absolute;background:rgba(0,0,0,.75);color:white;font-size:.6rem;padding:3px 7px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;font-family:'Space Mono',monospace}
+.ndvi-value{font-family:'Space Mono',monospace;font-size:.88rem;font-weight:700;background:var(--g50);color:var(--g700);padding:2px 10px;border-radius:99px;border:1px solid var(--g100)}
+[data-theme=dark] .ndvi-value{background:var(--g100);border-color:var(--g700)}
+.ndvi-bar-wrap{background:var(--border);height:6px;border-radius:99px;margin:8px 0 3px;overflow:hidden}
+.ndvi-bar{width:0;height:100%;background:linear-gradient(90deg,var(--red),var(--amber),var(--g400));border-radius:99px;transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+
+.rec-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:.76rem;color:var(--text2)}
+.rec-item:last-child{border-bottom:none}
+.rec-check{width:16px;height:16px;border-radius:50%;background:var(--g500);display:grid;place-items:center;flex-shrink:0;margin-top:1px}
+.rec-check svg{width:9px;height:9px;stroke:white;fill:none}
+.why-box{background:var(--amber-l);border:1px solid #fcd34d;border-radius:7px;padding:8px 10px;margin-top:8px;transition:background .3s}
+.why-title{font-size:.68rem;font-weight:700;color:#92400e;margin-bottom:4px}
+[data-theme=dark] .why-title{color:#f59e0b}
+.why-box p{font-size:.7rem;color:#78350f}
+[data-theme=dark] .why-box p{color:#d97706}
+
+.why-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.74rem;color:var(--text2)}
+.why-item:last-child{border-bottom:none}
+.why-icon{width:28px;height:28px;border-radius:7px;background:var(--g50);display:grid;place-items:center;flex-shrink:0;transition:background .3s}
+.why-icon svg{width:13px;height:13px;stroke:var(--g600);fill:none}
+
+.plan-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.plan-item:last-child{border-bottom:none}
+.plan-day{font-size:.64rem;font-weight:700;color:var(--text4);background:var(--surface2);border-radius:5px;padding:2px 7px;flex-shrink:0;font-family:'Space Mono',monospace}
+.plan-dot{width:8px;height:8px;border-radius:50%;background:var(--g400);flex-shrink:0}
+.plan-action{font-size:.78rem;font-weight:500;color:var(--text1)}
+.plan-reason{font-size:.68rem;color:var(--text4);margin-left:auto}
+.view-plan-btn{margin-top:10px;width:100%;padding:8px;border:1.5px solid var(--border);background:none;border-radius:7px;font-size:.76rem;font-weight:600;color:var(--text2);cursor:pointer;transition:.2s}
+.view-plan-btn:hover{background:var(--g50);border-color:var(--g400);color:var(--g700)}
+
+.yield-val{font-size:1.25rem;font-weight:700;color:var(--g600);font-family:'Space Mono',monospace}
+.yield-sub{font-size:.68rem;color:var(--text4);margin-bottom:8px}
+.conf-pill{font-size:.63rem;font-weight:600;color:var(--blue);background:var(--blue-l);border-radius:99px;padding:2px 8px}
+.chart-wrap{position:relative;height:110px;margin-top:4px}
+.chart-svg{width:100%;height:100%;overflow:visible}
+.chart-dot{cursor:pointer;transition:r .2s}
+.chart-tooltip-box{position:absolute;background:var(--text1);color:var(--surface);font-size:.65rem;padding:5px 9px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;font-family:'Space Mono',monospace;z-index:10}
+.chart-tooltip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--text1)}
+
+.donut-wrap{position:relative;width:90px;height:90px;margin:0 auto 10px}
+.donut-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut-track{fill:none;stroke:var(--border);stroke-width:10}
+.donut-fill{fill:none;stroke:var(--blue);stroke-width:10;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:220;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-pct{font-size:1.15rem;font-weight:800;color:var(--blue);font-family:'Space Mono',monospace}
+
+.sustain-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.sustain-metric{text-align:center;padding:8px;background:var(--g50);border-radius:7px;transition:background .3s}
+.metric-label{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.metric-big{font-size:1.15rem;font-weight:800;font-family:'Space Mono',monospace}
+.metric-unit{font-size:.62rem}
+.sustain-note{font-size:.7rem;color:var(--text3);padding:8px 10px;background:var(--surface2);border-radius:7px;display:flex;align-items:flex-start;gap:6px;transition:background .3s}
+.sustain-note svg{width:13px;height:13px;stroke:var(--g600);fill:none;flex-shrink:0;margin-top:1px}
+
+.wa-section{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px;transition:background .3s}
+.wa-header-strip{background:#128C7E;padding:14px 18px;display:flex;align-items:center;gap:10px}
+.wa-header-strip svg{width:22px;height:22px;fill:white;flex-shrink:0}
+.wa-header-strip h3{color:white;font-size:.88rem;font-weight:700}
+.wa-header-strip p{color:rgba(255,255,255,.75);font-size:.68rem}
+.wa-phones{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px}
+.phone{background:#1a1a1a;border-radius:14px;overflow:hidden;aspect-ratio:9/19;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.25);animation:phoneIn .5s ease both}
+@keyframes phoneIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.phone:nth-child(1){animation-delay:.08s}.phone:nth-child(2){animation-delay:.14s}
+.phone:nth-child(3){animation-delay:.2s}.phone:nth-child(4){animation-delay:.26s}
+.phone-status{background:#111;padding:3px 8px;display:flex;justify-content:space-between;align-items:center;font-size:.52rem;color:#888}
+.phone-wa-hdr{background:#128C7E;padding:5px 7px;display:flex;align-items:center;gap:5px}
+.wa-av{width:18px;height:18px;border-radius:50%;background:#25D366;display:grid;place-items:center;flex-shrink:0}
+.wa-av svg{width:11px;height:11px;fill:white}
+.wa-contact p{font-size:.58rem;font-weight:700;color:white}
+.wa-contact span{font-size:.48rem;color:rgba(255,255,255,.7)}
+.chat-area{flex:1;background:#e5ddd5;padding:5px;overflow:hidden;display:flex;flex-direction:column;gap:4px}
+.bubble{padding:4px 6px;border-radius:7px;font-size:.53rem;line-height:1.45;max-width:86%;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.bubble.r{background:white;align-self:flex-start;border-top-left-radius:2px}
+.bubble.s{background:#dcf8c6;align-self:flex-end;border-top-right-radius:2px}
+.bubble-img-box{padding:3px;background:white;align-self:flex-start;border-radius:7px;border-top-left-radius:2px}
+.b-img{width:72px;height:54px;border-radius:4px;display:block;background:linear-gradient(135deg,#1b5a2c,#3db862)}
+.btime{font-size:.43rem;color:#666;text-align:right;margin-top:2px}
+.typing-bubble{background:white;align-self:flex-start;border-radius:7px;border-top-left-radius:2px;padding:5px 8px;display:flex;gap:3px;align-items:center}
+.typing-dot{width:4px;height:4px;border-radius:50%;background:#aaa;animation:typingAnim 1.2s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typingAnim{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.step-badge{background:#075E54;color:white;font-size:.52rem;font-weight:700;padding:2px 5px;border-radius:99px;margin-bottom:3px;display:inline-block}
+.phone-input-row{background:#222;padding:4px 6px;display:flex;align-items:center;gap:4px}
+.p-input-box{flex:1;background:white;border-radius:99px;padding:3px 7px;font-size:.52rem;color:#666;border:none;outline:none;font-family:'DM Sans',sans-serif}
+.p-send{width:18px;height:18px;border-radius:50%;background:#25D366;display:grid;place-items:center;cursor:pointer;border:none;flex-shrink:0}
+.p-send svg{width:10px;height:10px;fill:white}
+
+.irr-table{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:8px}
+.irr-table th{font-size:.65rem;font-weight:600;color:var(--text4);padding:4px 6px;text-align:left;border-bottom:1px solid var(--border)}
+.irr-table td{padding:5px 6px;color:var(--text2);border-bottom:1px solid var(--border)}
+.irr-table tr:last-child td{border-bottom:none}
+.irr-table tr.irrigate td{color:var(--g600)}
+.irr-table tr.skip td{color:var(--text4)}
+.irr-table tr.monitor td{color:var(--amber)}
+.irr-table tr.drain td{color:var(--blue)}
+.irr-table tr.drip td{color:var(--blue)}
+.action-pill{font-size:.6rem;font-weight:600;padding:2px 7px;border-radius:999px;display:inline-block}
+.pill-irrigate{background:var(--g50);color:var(--g700)}
+.pill-skip{background:var(--surface2);color:var(--text4)}
+.pill-monitor{background:var(--amber-l);color:#92400e}
+.pill-drain{background:var(--blue-l);color:var(--blue)}
+.pill-drip{background:var(--blue-l);color:var(--blue)}
+.pill-rest{background:var(--surface2);color:var(--text4)}
+.pill-reduce{background:var(--amber-l);color:#92400e}
+.pill-refill{background:var(--g50);color:var(--g700)}
+
+.top-pred-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.top-pred-name{font-size:.7rem;color:var(--text2);width:160px;flex-shrink:0}
+.top-pred-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.top-pred-fill{height:100%;border-radius:2px}
+.top-pred-pct{font-size:.68rem;color:var(--text4);width:30px;text-align:right}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadeIn .2s ease}
+.modal-overlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border-radius:14px;width:min(600px,95vw);max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:slideUp .3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-title{font-size:1rem;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:8px}
+.modal-title svg{width:18px;height:18px;stroke:var(--g600);fill:none}
+.modal-close{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;display:grid;place-items:center;font-size:1rem;color:var(--text3);transition:.15s}
+.modal-close:hover{background:var(--border)}
+.modal-body{padding:18px 20px}
+.plan-day-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.plan-day-header{padding:10px 14px;display:flex;align-items:center;gap:10px}
+.plan-day-num{font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;color:white;background:var(--g600);border-radius:5px;padding:3px 10px}
+.plan-day-label{font-size:.82rem;font-weight:700;color:var(--text1)}
+.plan-day-body{padding:10px 14px;border-top:1px solid var(--border)}
+.plan-task{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:.78rem;color:var(--text2)}
+.plan-task svg{width:14px;height:14px;stroke:var(--g600);fill:none;flex-shrink:0;margin-top:1px}
+.plan-note{font-size:.7rem;color:var(--text4);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-top:6px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.btn-primary{padding:8px 18px;background:var(--g700);color:white;border:none;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-primary:hover{background:var(--g800)}
+.btn-secondary{padding:8px 18px;background:none;color:var(--text2);border:1.5px solid var(--border);border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-secondary:hover{background:var(--surface2)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--g800);color:white;padding:10px 16px;border-radius:9px;font-size:.78rem;font-weight:500;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;animation:toastIn .3s ease;max-width:300px}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.toast.hide{animation:toastOut .3s ease forwards}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px)}}
+.toast svg{width:16px;height:16px;stroke:white;fill:none;flex-shrink:0}
+
+.api-status{font-size:.65rem;padding:3px 8px;border-radius:999px;font-weight:500}
+.api-online{background:var(--g50);color:var(--g700)}
+.api-offline{background:var(--red-l);color:var(--red)}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" stroke="rgba(255,255,255,.5)" stroke-width=".8" fill="none"/></svg>
+    </div>
+    <div class="logo-text"><h1>KrishiSahayak AI</h1><p>AI-Powered Crop Intelligence</p></div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>Dashboard
+    </button>
+    <button class="nav-tab" data-tab="disease">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke-width="2"/></svg>Disease Detection
+    </button>
+    <button class="nav-tab" data-tab="forecast">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-width="2"/></svg>Forecasting
+    </button>
+    <button class="nav-tab" data-tab="sustain">
+      <svg viewBox="0 0 24 24"><path d="M3 6l9-4 9 4v6c0 5-4.5 9-9 10C7.5 21 3 17 3 12V6z" stroke-width="2"/></svg>Sustainability
+    </button>
+  </nav>
+  <div class="header-right">
+    <span class="api-status api-offline" id="apiStatus">● Backend checking...</span>
+    <div class="toggle-icons">
+      <span>☀️</span>
+      <button class="dark-toggle" id="darkToggle" title="Toggle dark mode"></button>
+      <span>🌙</span>
+    </div>
+    <div class="user-badge">
+      <div class="avatar">K</div>
+      <div class="user-info"><p>Admin</p><span>Agronomist</span></div>
+    </div>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <button class="sidebar-item active"><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</button>
+  <button class="sidebar-item" id="sideUpload"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Upload Image</button>
+  <button class="sidebar-item"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>Weather &amp; Soil</button>
+  <button class="sidebar-item"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>AI Recommendation</button>
+  <button class="sidebar-item"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Explainability</button>
+  <button class="sidebar-item"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M3 6l9-4 9 4v6c0 5-4.5 9-9 10C7.5 21 3 17 3 12V6z"/></svg>Sustainability</button>
+  <button class="sidebar-item"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>History</button>
+  <div class="sidebar-bottom">
+    <div class="device-card">
+      <h4>Connected Device</h4>
+      <div class="device-name"><span class="dot"></span>Edge Node 01</div>
+      <div class="online-badge">● Online</div>
+    </div>
+    <div class="federated-card">
+      <h4>Federated Learning</h4>
+      <div class="fed-status">Status: Synced</div>
+      <div class="fed-bar-wrap"><div class="fed-bar"></div></div>
+      <div class="fed-sync">847 farms connected · privacy preserved</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- ROW 1 -->
+  <div class="grid-4">
+
+    <!-- 1. Leaf Upload -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/></svg>Leaf Image / Upload</div>
+      </div>
+      <div class="card-body">
+        <div class="leaf-zone" id="leafZone" title="Click or drag to upload leaf image">
+          <div class="leaf-placeholder" id="leafPlaceholder">
+            <div class="spot"></div><div class="spot"></div><div class="spot"></div><div class="spot"></div>
+            <svg class="leaf-icon" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" stroke-width="1.5"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <p class="leaf-hint">Click or drag image here</p>
+          </div>
+          <img class="leaf-uploaded" id="leafPreview" alt="Uploaded leaf"/>
+        </div>
+        <input type="file" class="file-input" id="fileInput" accept="image/*"/>
+        <button class="upload-btn" id="uploadBtn">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="white" fill="none"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          Upload &amp; Analyse
+        </button>
+        <p class="upload-hint">JPG, PNG · drag &amp; drop supported</p>
+        <div style="margin-top:10px;background:var(--g50);border:1px solid var(--g100);border-radius:7px;padding:7px 10px;font-size:.65rem;color:var(--g700)">
+          🔒 Federated AI — your image is processed locally. Raw data never leaves your device.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Disease Prediction -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Disease Prediction</div>
+      </div>
+      <div class="card-body">
+        <div class="disease-name" id="diseaseName">Upload image</div>
+        <div class="disease-sci" id="diseaseSci">to see results</div>
+        <div class="conf-label"><span>Confidence Score</span><span id="confPct">—</span></div>
+        <div class="conf-bar" id="confBarWrap">
+          <div class="conf-fill" id="confFill"></div>
+          <div class="conf-tooltip" id="confTip">—</div>
+        </div>
+        <div style="margin:8px 0 10px">
+          <div style="font-size:.65rem;color:var(--text4);margin-bottom:6px">All predictions</div>
+          <div id="topPredictions"></div>
+        </div>
+        <div class="disease-meta">
+          <div class="meta-item"><label>Severity</label><div class="val" id="severityVal">—</div></div>
+          <div class="meta-item"><label>Model</label><div class="val" style="font-size:.68rem" id="modelVal">EfficientNet-Lite</div></div>
+          <div class="meta-item"><label>Affected Area</label><div class="val" id="affectedVal">—</div></div>
+          <div class="meta-item"><label>Inference</label><div class="val" style="font-size:.68rem" id="inferenceVal">—</div></div>
+        </div>
+        <button class="listen-btn" id="listenBtn">
+          <svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          🇮🇳 Listen in Hindi
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Heatmap -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" stroke-width="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-width="2"/></svg>Grad-CAM Heatmap</div>
+      </div>
+      <div class="card-body">
+        <div class="heatmap-wrap" id="heatmapWrap">
+          <div class="heatmap-cursor" id="heatCursor"></div>
+          <div class="heatmap-tooltip" id="heatTip"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <span style="font-size:.6rem;color:var(--text4)">Low activation</span>
+          <div style="flex:1;height:6px;border-radius:99px;background:linear-gradient(90deg,#2563eb,#22c55e,#f59e0b,#dc2626)"></div>
+          <span style="font-size:.6rem;color:var(--text4)">High activation</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--text4);margin-top:3px"><span>0.0</span><span>0.5</span><span>1.0</span></div>
+        <div style="margin-top:8px;font-size:.65rem;color:var(--text3)">Red zones indicate disease-affected regions detected by EfficientNet-Lite</div>
+      </div>
+    </div>
+
+    <!-- 4. Weather & Soil -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z" stroke-width="2"/></svg>Weather &amp; Soil Input</div></div>
+      <div class="card-body">
+        <div class="section-title">Weather (Today)</div>
+        <div class="weather-row"><span class="label"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>Temperature</span><span class="value" id="wTemp">28 °C</span></div>
+        <div class="weather-row"><span class="label"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>Humidity</span><span class="value">78%</span></div>
+        <div class="weather-row"><span class="label"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="8" y1="19" x2="8" y2="21"/><line x1="16" y1="19" x2="16" y2="21"/><line x1="12" y1="21" x2="12" y2="23"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></svg>Rainfall forecast</span><span class="value" id="wRain">8 mm</span></div>
+        <div class="weather-row"><span class="label"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>Wind Speed</span><span class="value">12 km/h</span></div>
+        <div class="section-title" style="margin-top:10px">Soil Sensor (Live)</div>
+        <div class="soil-row"><span class="soil-label">Moisture</span><span class="soil-val soil-ok" id="soilMoisture">34%</span></div>
+        <div class="soil-row"><span class="soil-label">NDVI Index</span><span class="soil-val" id="ndviVal">0.73</span></div>
+        <div class="soil-row"><span class="soil-label">pH Level</span><span class="soil-val">6.8</span></div>
+        <div class="soil-row"><span class="soil-label">Nitrogen (N)</span><span class="soil-val">Medium</span></div>
+        <div class="soil-row"><span class="soil-label">Phosphorus (P)</span><span class="soil-val soil-high">High</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="grid-4">
+
+    <!-- NDVI -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" stroke-width="2"/><polyline points="21 15 16 10 5 21" stroke-width="2"/></svg>Satellite NDVI (Sentinel-2)</div></div>
+      <div class="card-body">
+        <div class="ndvi-map" id="ndviMap">
+          <div class="ndvi-hover-tip" id="ndviTip"></div>
+        </div>
+        <div class="ndvi-bar-wrap"><div class="ndvi-bar" id="ndviBar"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--text4)"><span>0.0</span><span>0.5</span><span>1.0</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span style="font-size:.74rem;color:var(--text3)">NDVI Score</span>
+          <span class="ndvi-value" id="ndviScore">0.73</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Recommendation -->
+    <div class="card">
+      <div class="card-header"><div class="card-title" style="color:var(--g700)"><svg viewBox="0 0 24 24" stroke="var(--g600)"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-width="2"/></svg>AI Recommendation</div></div>
+      <div class="card-body">
+        <p style="font-size:.7rem;color:var(--text3);margin-bottom:8px" id="recIntro">Upload an image to get recommendations</p>
+        <div id="recSteps"></div>
+        <div class="why-box" id="whyBox" style="display:none">
+          <div class="why-title">⚠ Why this recommendation?</div>
+          <p id="whyText"></p>
+        </div>
+        <div style="margin-top:10px;font-size:.68rem;font-style:italic;color:var(--text4)" id="hindiRec"></div>
+      </div>
+    </div>
+
+    <!-- Why AI -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2"/></svg>Why did AI say this?</div></div>
+      <div class="card-body" id="whyAIBody">
+        <div class="why-item"><div class="why-icon"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><span>Upload a crop image to see AI reasoning</span></div>
+      </div>
+    </div>
+
+    <!-- 7-Day Plan -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/></svg>7-Day Action Plan</div></div>
+      <div class="card-body">
+        <div id="planItems">
+          <div class="plan-item"><span class="plan-day">—</span><div class="plan-dot"></div><span class="plan-action" style="color:var(--text4)">Upload image to generate plan</span></div>
+        </div>
+        <button class="view-plan-btn" id="viewPlanBtn">📋 View Full 7-Day Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="grid-3">
+
+    <!-- Yield Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-width="2"/></svg>Yield Prediction</div>
+        <span class="conf-pill">Without vs With Treatment</span>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+          <div style="text-align:center;padding:8px;background:var(--red-l);border-radius:7px">
+            <div style="font-size:.62rem;color:var(--text4);margin-bottom:3px">Without treatment</div>
+            <div class="yield-val" style="color:var(--red);font-size:1rem" id="yieldWithout">—</div>
+            <div style="font-size:.6rem;color:var(--text4)">quintals/acre</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:var(--g50);border-radius:7px">
+            <div style="font-size:.62rem;color:var(--text4);margin-bottom:3px">With treatment</div>
+            <div class="yield-val" style="font-size:1rem" id="yieldWith">—</div>
+            <div style="font-size:.6rem;color:var(--text4)">quintals/acre</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:var(--blue-l);border-radius:7px">
+            <div style="font-size:.62rem;color:var(--text4);margin-bottom:3px">Seasonal avg</div>
+            <div class="yield-val" style="color:var(--blue);font-size:1rem">30</div>
+            <div style="font-size:.6rem;color:var(--text4)">quintals/acre</div>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <div style="font-size:.65rem;color:var(--text4);margin-bottom:6px">Irrigation schedule</div>
+          <table class="irr-table" id="irrigationTable">
+            <thead><tr><th>Day</th><th>Action</th><th>Reason</th><th>Water</th></tr></thead>
+            <tbody id="irrigationBody">
+              <tr><td colspan="4" style="text-align:center;color:var(--text4);font-size:.68rem;padding:8px">Upload image to see schedule</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Water -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke-width="2"/></svg>Water Optimization</div></div>
+      <div class="card-body" style="text-align:center">
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 90 90">
+            <circle class="donut-track" cx="45" cy="45" r="35"/>
+            <circle class="donut-fill" id="donutFill" cx="45" cy="45" r="35"/>
+          </svg>
+          <div class="donut-center"><span class="donut-pct">18%</span><span style="font-size:.55rem;color:var(--text4)">saved</span></div>
+        </div>
+        <p style="font-weight:700;font-size:.85rem;color:var(--blue)">Water can be saved</p>
+        <div style="margin-top:10px"><p style="font-size:.7rem;color:var(--text4)">Optimized Irrigation</p><strong style="font-size:.9rem">42 mm/week</strong></div>
+        <div style="margin-top:12px;font-size:.68rem;color:var(--text3)" id="irrigAdvice">Upload image to see irrigation advice</div>
+      </div>
+    </div>
+
+    <!-- Sustainability -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><svg viewBox="0 0 24 24"><path d="M3 6l9-4 9 4v6c0 5-4.5 9-9 10C7.5 21 3 17 3 12V6z" stroke-width="2"/></svg>Sustainability Impact</div></div>
+      <div class="card-body">
+        <div class="sustain-grid">
+          <div class="sustain-metric">
+            <div class="metric-label" style="color:var(--blue)">Water Saved</div>
+            <div class="metric-big" style="color:var(--blue)" id="waterSaved">—</div>
+            <div class="metric-unit" style="color:var(--blue)">Litres</div>
+          </div>
+          <div class="sustain-metric">
+            <div class="metric-label" style="color:var(--g700)">Carbon Impact</div>
+            <div class="metric-big" style="color:var(--g700)" id="carbonImpact">—</div>
+            <div class="metric-unit" style="color:var(--g600)">rating</div>
+          </div>
+          <div class="sustain-metric" style="grid-column:span 2">
+            <div class="metric-label" style="color:var(--amber)">Yield Protection Value</div>
+            <div class="metric-big" style="color:var(--amber)" id="econProtect">—</div>
+            <div class="metric-unit" style="color:var(--amber)">₹ estimated savings</div>
+          </div>
+        </div>
+        <div class="sustain-note"><svg viewBox="0 0 24 24"><path d="M3 6l9-4 9 4v6c0 5-4.5 9-9 10C7.5 21 3 17 3 12V6z" stroke-width="2"/></svg><span id="fedNote">Following AI recommendations contributes to sustainable farming and reduced environmental impact.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHATSAPP SECTION -->
+  
+
+<!-- MODAL -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/></svg>Full 7-Day Crop Recovery Plan</div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <p style="font-size:.78rem;color:var(--text3);margin-bottom:14px">Upload an image to generate a personalized plan</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="modalClose2">Close</button>
+      <button class="btn-primary" onclick="showToast('📥 Plan exported!')">Export as PDF</button>
+      <button class="btn-primary" style="background:#0d9488" onclick="showToast('📲 Plan sent to WhatsApp!')">Send to WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let currentData = null;
+let hindiTextForSpeech = '';
+let speaking = false;
+
+// ── BACKEND STATUS CHECK ──────────────────────
+async function checkBackend() {
+  try {
+    const r = await fetch(`${API}/health`);
+    if (r.ok) {
+      document.getElementById('apiStatus').textContent = '● Backend online';
+      document.getElementById('apiStatus').className = 'api-status api-online';
+    }
+  } catch {
+    document.getElementById('apiStatus').textContent = '● Backend offline';
+    document.getElementById('apiStatus').className = 'api-status api-offline';
+  }
+}
+checkBackend();
+setInterval(checkBackend, 10000);
+
+// ── DARK MODE ─────────────────────────────────
+const html = document.documentElement;
+const saved = localStorage.getItem('krishi-theme') || 'light';
+html.setAttribute('data-theme', saved);
+document.getElementById('darkToggle').addEventListener('click', () => {
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('krishi-theme', next);
+  showToast(next === 'dark' ? '🌙 Dark mode on' : '☀️ Light mode on');
+});
+
+// ── NAV ───────────────────────────────────────
+document.querySelectorAll('.nav-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+document.querySelectorAll('.sidebar-item').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-item').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+document.getElementById('sideUpload').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+
+// ── IMAGE UPLOAD ──────────────────────────────
+const leafZone     = document.getElementById('leafZone');
+const fileInput    = document.getElementById('fileInput');
+const leafPlaceholder = document.getElementById('leafPlaceholder');
+const leafPreview  = document.getElementById('leafPreview');
+const uploadBtn    = document.getElementById('uploadBtn');
+
+uploadBtn.addEventListener('click', () => fileInput.click());
+leafZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+leafZone.addEventListener('dragover', e => { e.preventDefault(); leafZone.style.opacity = '.7'; });
+leafZone.addEventListener('dragleave', () => { leafZone.style.opacity = '1'; });
+leafZone.addEventListener('drop', e => {
+  e.preventDefault(); leafZone.style.opacity = '1';
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) handleFile(f);
+});
+
+async function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    leafPreview.src = ev.target.result;
+    leafPreview.style.display = 'block';
+    leafPlaceholder.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+
+  uploadBtn.disabled = true;
+  uploadBtn.innerHTML = '🔍 Analysing...';
+  showToast('🌿 Uploading image to KrishiSahayak AI...');
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const res = await fetch(`${API}/predict-disease`, { method: 'POST', body: form });
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    currentData = data;
+    populateDashboard(data);
+    showToast(`🔬 ${data.prediction.disease} detected — ${Math.round(data.prediction.confidence * 100)}% confidence`);
+  } catch(e) {
+    showToast('⚠ Could not connect to backend. Is it running on port 8000?');
+    uploadBtn.disabled = false;
+    uploadBtn.innerHTML = '↑ Upload & Analyse';
+  }
+}
+
+// ── POPULATE DASHBOARD FROM API ───────────────
+function getPillClass(action) {
+  const map = {
+    'Irrigate':'pill-irrigate','Refill':'pill-refill',
+    'Skip':'pill-skip','Rest':'pill-rest',
+    'Monitor':'pill-monitor','Drip only':'pill-drip',
+    'Reduce':'pill-reduce','Drain partial':'pill-drain'
+  };
+  return map[action] || 'pill-skip';
+}
+
+function getRowClass(action) {
+  const map = {
+    'Irrigate':'irrigate','Refill':'irrigate',
+    'Skip':'skip','Rest':'skip',
+    'Monitor':'monitor','Reduce':'monitor',
+    'Drip only':'drip','Drain partial':'drain'
+  };
+  return map[action] || 'skip';
+}
+
+function populateDashboard(data) {
+  const pred = data.prediction;
+  const rec  = data.recommendation;
+  const fore = data.forecast;
+  const sus  = data.sustainability;
+
+  // Disease card
+  document.getElementById('diseaseName').textContent = pred.disease;
+  document.getElementById('diseaseSci').textContent  = pred.disease_hi || '';
+  const confPct = Math.round(pred.confidence * 100);
+  document.getElementById('confPct').textContent = `${confPct}%`;
+  document.getElementById('confFill').style.width = `${confPct}%`;
+  document.getElementById('confTip').textContent  = `Confidence: ${confPct}%`;
+  const sevEl = document.getElementById('severityVal');
+  sevEl.textContent = pred.severity === 'high' ? 'High' : 'Moderate';
+  sevEl.className = `val ${pred.severity === 'high' ? 'severity-high' : 'severity-moderate'}`;
+  document.getElementById('affectedVal').textContent   = pred.affected_area;
+  document.getElementById('inferenceVal').textContent  = `${pred.inference_time_ms}ms`;
+
+  // Top predictions
+  const topEl = document.getElementById('topPredictions');
+  topEl.innerHTML = (pred.top_predictions || []).map((p, i) => `
+    <div class="top-pred-row">
+      <div class="top-pred-name">${p.disease}</div>
+      <div class="top-pred-bar"><div class="top-pred-fill" style="width:${Math.round(p.confidence*100)}%;background:${i===0?'var(--g500)':'var(--border)'}"></div></div>
+      <div class="top-pred-pct">${Math.round(p.confidence*100)}%</div>
+    </div>
+  `).join('');
+
+  // Recommendation
+  document.getElementById('recIntro').textContent = rec.text_en || rec.text || '';
+  document.getElementById('hindiRec').textContent = rec.text_hi || rec.hindi || '';
+  const stepsEl = document.getElementById('recSteps');
+  const steps = rec.steps || [];
+  stepsEl.innerHTML = steps.map(s => {
+    const stepEn = typeof s === 'object' ? s.en : s;
+    return `<div class="rec-item"><div class="rec-check"><svg viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>${stepEn}</span></div>`;
+  }).join('');
+  const whyBox = document.getElementById('whyBox');
+  const whyText = document.getElementById('whyText');
+  const reasoning = rec.reasoning_en || rec.reasoning || '';
+  if (reasoning) {
+    whyBox.style.display = 'block';
+    whyText.textContent = reasoning;
+  }
+
+  // Hindi TTS text
+  hindiTextForSpeech = rec.text_hi || rec.hindi || '';
+
+  // Why AI
+  const whyBody = document.getElementById('whyAIBody');
+  const reasoningHi = rec.reasoning_hi || rec.reasoning || '';
+  whyBody.innerHTML = `
+    <div class="why-item"><div class="why-icon"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><span>${reasoning}</span></div>
+    <div class="why-item"><div class="why-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div><span>Humidity 78% strongly favors disease spread — high risk period</span></div>
+    <div class="why-item"><div class="why-icon"><svg viewBox="0 0 24 24" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span>NDVI ${fore.ndvi} indicates ${fore.ndvi > 0.6 ? 'good' : 'moderate'} crop health index</span></div>
+    <div class="why-item"><div class="why-icon"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div><span>Soil moisture ${fore.soil_moisture}% — optimal conditions for fungal growth</span></div>
+    ${reasoningHi ? `<div class="why-item" style="background:var(--g50);border-radius:6px;margin-top:4px;padding:6px 8px"><div class="why-icon"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><span style="color:var(--g700);font-style:italic">${reasoningHi}</span></div>` : ''}
+  `;
+
+  // Weather from backend data
+  document.getElementById('wTemp').textContent = `${fore.temperature} °C`;
+  document.getElementById('wRain').textContent = `${fore.rainfall_forecast_mm} mm`;
+  document.getElementById('soilMoisture').textContent = `${fore.soil_moisture}%`;
+  document.getElementById('ndviVal').textContent = fore.ndvi;
+  document.getElementById('ndviScore').textContent = fore.ndvi;
+  document.getElementById('ndviBar').style.width = `${fore.ndvi * 100}%`;
+
+  // Yield
+  const yp = fore.yield_prediction;
+  document.getElementById('yieldWithout').textContent = yp.without_treatment;
+  document.getElementById('yieldWith').textContent    = yp.with_treatment;
+
+  // Irrigation advice
+  const irrigAdviceEn = fore.irrigation_advice_en || fore.irrigation_advice || '';
+  const irrigAdviceHi = fore.irrigation_advice_hi || '';
+  document.getElementById('irrigAdvice').textContent = irrigAdviceHi ? `${irrigAdviceEn} / ${irrigAdviceHi}` : irrigAdviceEn;
+
+  // Irrigation table
+  const sched = fore.irrigation_schedule || [];
+  const tbody  = document.getElementById('irrigationBody');
+  tbody.innerHTML = sched.map(r => `
+    <tr class="${getRowClass(r.action_en || r.action)}">
+      <td>${r.date}</td>
+      <td><span class="action-pill ${getPillClass(r.action_en || r.action)}">${r.action_en || r.action}</span></td>
+      <td style="color:var(--text4);font-size:.65rem">${r.reason_en || r.reason}</td>
+      <td>${r.amount_mm > 0 ? r.amount_mm + 'mm' : '—'}</td>
+    </tr>
+  `).join('');
+
+  // 7-day plan preview
+  const planEl = document.getElementById('planItems');
+  planEl.innerHTML = sched.slice(0, 4).map(r => `
+    <div class="plan-item">
+      <span class="plan-day">${r.date}</span>
+      <div class="plan-dot" style="background:${r.amount_mm > 0 ? 'var(--g400)' : 'var(--text4)'}"></div>
+      <span class="plan-action">${r.action_en || r.action}</span>
+      <span class="plan-reason">${r.reason_en || r.reason}</span>
+    </div>
+  `).join('');
+
+  // Sustainability
+  document.getElementById('waterSaved').textContent  = (sus.water_saved_litres || 0).toLocaleString();
+  document.getElementById('carbonImpact').textContent = sus.carbon_impact || 'Low';
+  document.getElementById('econProtect').textContent  = `₹${(sus.economic_protection_inr || 0).toLocaleString()}`;
+  document.getElementById('fedNote').textContent = data.federated_note_en || data.federated_note || '';
+
+  // Modal full plan
+  buildModal(data);
+
+  // Phone 4 update
+  const p4 = document.getElementById('phone4Chat');
+  p4.innerHTML = `<div class="bubble r">🌿 Disease: <strong>${pred.disease}</strong><br>Confidence: ${confPct}%<br><br>✅ ${typeof (rec.steps||[])[0] === 'object' ? (rec.steps[0]||{}).en : (rec.steps||[])[0] || ''}<br><br>🔒 Data stayed on your device<div class="btime">${getTime()}</div></div>`;
+
+  uploadBtn.disabled = false;
+  uploadBtn.innerHTML = '✅ Loaded — Upload Another';
+  uploadBtn.style.background = 'var(--g500)';
+}
+
+function buildModal(data) {
+  const sched = data.forecast?.irrigation_schedule || [];
+  const disease = data.prediction?.disease || 'Unknown';
+  const steps = data.recommendation?.steps || [];
+  const getStep = (s) => typeof s === 'object' ? s.en : s;
+
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:.78rem;color:var(--text3);margin-bottom:14px">
+      Personalized plan for <strong>${disease}</strong> — Severity: ${data.prediction?.severity || 'moderate'}
+    </p>
+    <div class="plan-day-card">
+      <div class="plan-day-header" style="background:var(--red-l)">
+        <span class="plan-day-num" style="background:var(--red)">Day 1–2</span>
+        <span class="plan-day-label">Emergency Treatment Phase</span>
+      </div>
+      <div class="plan-day-body">
+        ${steps.slice(0,2).map(s => `<div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>${getStep(s)}</div>`).join('')}
+        <div class="plan-note">⚠ Apply treatment in early morning or late evening to avoid leaf burn</div>
+      </div>
+    </div>
+    <div class="plan-day-card">
+      <div class="plan-day-header" style="background:var(--amber-l)">
+        <span class="plan-day-num" style="background:var(--amber)">Day 3–4</span>
+        <span class="plan-day-label">Monitoring & Drainage</span>
+      </div>
+      <div class="plan-day-body">
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>${sched[2]?.reason_en || sched[2]?.reason || 'Monitor crop conditions'}</div>
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Check humidity levels and drainage channels</div>
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Take new leaf photos and upload for AI re-analysis</div>
+        <div class="plan-note">📊 ${sched[2]?.action_en || sched[2]?.action || 'Monitor'} — ${sched[2]?.amount_mm > 0 ? sched[2].amount_mm + 'mm water' : 'No irrigation'}</div>
+      </div>
+    </div>
+    <div class="plan-day-card">
+      <div class="plan-day-header" style="background:var(--blue-l)">
+        <span class="plan-day-num" style="background:var(--blue)">Day 5–6</span>
+        <span class="plan-day-label">Recovery & Irrigation</span>
+      </div>
+      <div class="plan-day-body">
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>${sched[4]?.action_en || 'Resume light irrigation'} — ${sched[4]?.reason_en || sched[4]?.reason || ''}</div>
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>${sched[5]?.action_en || 'Irrigate'} on Day 6 — ${sched[5]?.amount_mm > 0 ? sched[5].amount_mm + 'mm' : 'as needed'}</div>
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Apply foliar micronutrient spray if needed</div>
+        <div class="plan-note">💧 ${data.forecast?.irrigation_advice_en || data.forecast?.irrigation_advice || 'Follow irrigation schedule'}</div>
+      </div>
+    </div>
+    <div class="plan-day-card">
+      <div class="plan-day-header" style="background:var(--g50)">
+        <span class="plan-day-num">Day 7</span>
+        <span class="plan-day-label">Field Assessment</span>
+      </div>
+      <div class="plan-day-body">
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Complete field walkthrough — document recovery status</div>
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Upload 5–10 leaf images across different zones</div>
+        <div class="plan-task"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Generate final report from dashboard</div>
+        <div class="plan-note">✅ If infection reduced by >60%, no further action needed</div>
+      </div>
+    </div>
+  `;
+}
+
+// ── LISTEN IN HINDI ───────────────────────────
+const listenBtn = document.getElementById('listenBtn');
+listenBtn.addEventListener('click', () => {
+  if (!window.speechSynthesis) { showToast('⚠ Speech not supported in this browser'); return; }
+  if (!hindiTextForSpeech) { showToast('⚠ Upload an image first to get Hindi advice'); return; }
+  if (speaking) {
+    speechSynthesis.cancel(); speaking = false;
+    listenBtn.classList.remove('speaking');
+    listenBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> 🇮🇳 Listen in Hindi`;
+    return;
+  }
+  const utt = new SpeechSynthesisUtterance(hindiTextForSpeech);
+  utt.lang = 'hi-IN'; utt.rate = 0.9; utt.pitch = 1;
+  const voices = speechSynthesis.getVoices();
+  const hindiVoice = voices.find(v => v.lang === 'hi-IN' || v.lang.startsWith('hi'));
+  if (hindiVoice) utt.voice = hindiVoice;
+  utt.onstart = () => {
+    speaking = true;
+    listenBtn.classList.add('speaking');
+    listenBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="14" height="14"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> ⏹ Stop`;
+    showToast('🔊 Playing Hindi advice...');
+  };
+  utt.onend = utt.onerror = () => {
+    speaking = false;
+    listenBtn.classList.remove('speaking');
+    listenBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg> 🇮🇳 Listen in Hindi`;
+  };
+  speechSynthesis.speak(utt);
+});
+speechSynthesis.onvoiceschanged = () => {};
+
+// ── HEATMAP HOVER ─────────────────────────────
+const heatWrap   = document.getElementById('heatmapWrap');
+const heatCursor = document.getElementById('heatCursor');
+const heatTip    = document.getElementById('heatTip');
+const zones = [
+  {x:[40,70],y:[25,55],label:'High Activation (0.91)',color:'#dc2626'},
+  {x:[50,80],y:[40,65],label:'High Activation (0.87)',color:'#f59e0b'},
+  {x:[10,40],y:[50,80],label:'Medium Activation (0.54)',color:'#22c55e'},
+  {x:[20,60],y:[10,35],label:'Low Activation (0.23)',color:'#2563eb'},
+];
+heatWrap.addEventListener('mousemove', e => {
+  const r = heatWrap.getBoundingClientRect();
+  const px = ((e.clientX-r.left)/r.width)*100;
+  const py = ((e.clientY-r.top)/r.height)*100;
+  heatCursor.style.left = `${e.clientX-r.left}px`;
+  heatCursor.style.top  = `${e.clientY-r.top}px`;
+  heatCursor.style.opacity = '1';
+  const zone = zones.find(z => px>=z.x[0]&&px<=z.x[1]&&py>=z.y[0]&&py<=z.y[1]);
+  if (zone) {
+    heatTip.textContent = zone.label;
+    heatTip.style.left  = `${e.clientX-r.left+12}px`;
+    heatTip.style.top   = `${e.clientY-r.top-28}px`;
+    heatTip.style.opacity = '1';
+    heatTip.style.background = zone.color+'dd';
+  } else { heatTip.style.opacity='0'; }
+});
+heatWrap.addEventListener('mouseleave', () => { heatCursor.style.opacity='0'; heatTip.style.opacity='0'; });
+
+// ── NDVI HOVER ────────────────────────────────
+const ndviMap = document.getElementById('ndviMap');
+const ndviTip = document.getElementById('ndviTip');
+setTimeout(() => { document.getElementById('ndviBar').style.width = '73%'; }, 500);
+ndviMap.addEventListener('mousemove', e => {
+  const r = ndviMap.getBoundingClientRect();
+  const px = (e.clientX-r.left)/r.width;
+  const py = (e.clientY-r.top)/r.height;
+  const val = (0.2+Math.abs(Math.sin(px*4+py*3))*0.7).toFixed(2);
+  ndviTip.style.left = `${e.clientX-r.left+8}px`;
+  ndviTip.style.top  = `${e.clientY-r.top-30}px`;
+  ndviTip.textContent = `NDVI: ${val}`;
+  ndviTip.style.opacity = '1';
+});
+ndviMap.addEventListener('mouseleave', () => { ndviTip.style.opacity='0'; });
+
+// ── DONUT ─────────────────────────────────────
+const circumference = 2 * Math.PI * 35;
+setTimeout(() => {
+  document.getElementById('donutFill').style.strokeDashoffset = circumference*(1-0.18);
+}, 600);
+
+// ── CONF BAR HOVER ────────────────────────────
+const confBarWrap = document.getElementById('confBarWrap');
+const confTipEl   = document.getElementById('confTip');
+confBarWrap.addEventListener('mousemove', e => {
+  const r = confBarWrap.getBoundingClientRect();
+  const pct = Math.round(((e.clientX-r.left)/r.width)*100);
+  confTipEl.style.left = `${e.clientX-r.left}px`;
+  confTipEl.textContent = `${pct}%`;
+  confTipEl.style.opacity = '1';
+});
+confBarWrap.addEventListener('mouseleave', () => { confTipEl.style.opacity='0'; });
+
+// ── MODAL ─────────────────────────────────────
+const planModal = document.getElementById('planModal');
+document.getElementById('viewPlanBtn').addEventListener('click', () => planModal.classList.add('open'));
+[document.getElementById('modalClose'),document.getElementById('modalClose2')].forEach(b => {
+  b.addEventListener('click', () => planModal.classList.remove('open'));
+});
+planModal.addEventListener('click', e => { if(e.target===planModal) planModal.classList.remove('open'); });
+
+// ── WHATSAPP BOT SIM ──────────────────────────
+const chatArea  = document.getElementById('chatArea');
+const chatInput = document.getElementById('chatInput');
+const chatSend  = document.getElementById('chatSend');
+const botStatus = document.getElementById('botStatus');
+
+function getTime() {
+  const d = new Date();
+  return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} ${d.getHours()>=12?'PM':'AM'}`;
+}
+function addBubble(text, type) {
+  const d = document.createElement('div');
+  d.className = `bubble ${type}`;
+  d.innerHTML = text.replace(/\n/g,'<br>').replace(/\*(.*?)\*/g,'<strong>$1</strong>')+`<div class="btime">${getTime()}</div>`;
+  chatArea.appendChild(d);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+function showTypingWA() {
+  const d = document.createElement('div');
+  d.className='typing-bubble';d.id='waTyping';
+  d.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  chatArea.appendChild(d);chatArea.scrollTop=chatArea.scrollHeight;
+  botStatus.textContent='typing...';
+}
+function hideTypingWA() {
+  const t=document.getElementById('waTyping');if(t)t.remove();
+  botStatus.textContent='online';
+}
+
+const botResponses = {
+  '1':{delay:1500,msgs:['📸 Please upload a clear photo of the affected leaf.\n\nMake sure the leaf is well-lit and fills most of the frame.',{delay:4000,text:'🔍 Analyzing image with EfficientNet-Lite...',loading:true},{delay:7000,text:`🌿 Disease: *${currentData?.prediction?.disease || 'Wheat Leaf Rust'}*\nConfidence: ${currentData ? Math.round(currentData.prediction.confidence*100) : 81}%\n\n✅ ${currentData ? (typeof (currentData.recommendation?.steps||[])[0]==='object' ? (currentData.recommendation.steps[0]||{}).en : (currentData.recommendation?.steps||[])[0]) : 'Apply Mancozeb 75% WP @ 2.5g/L'}\n\n🔒 Data stayed on your device`}]},
+  '2':{delay:1200,msgs:['📅 7-Day Weather Forecast:\n\n🌤 Day 1-2: 28°C, Humid (78%)\n🌧 Day 3-4: Light rain — 8mm forecast\n⛅ Day 5-6: Partly cloudy, 26°C\n☀️ Day 7: Clear, humidity dropping\n\n⚠ High humidity Days 1-4 — fungal spread risk. Act today!']},
+  '3':{delay:1000,msgs:[`💧 Water Optimization Report\n\nCurrent usage: ~51mm/week\nRecommended: 42mm/week\nSavings: *18%* (~2,400 L)\n\n${currentData?.forecast?.irrigation_advice_en || 'Follow smart irrigation schedule'}\n\nSaving ₹${(currentData?.sustainability?.economic_protection_inr||42000).toLocaleString()} this season!`]},
+  '4':{delay:800,msgs:['👨‍🌾 Connecting to expert agronomist...\n\nAvailable experts:\n• Dr. Ramesh Kumar — Wheat specialist\n• Dr. Priya Sharma — Plant pathology\n• Mr. Anil Verma — Soil management\n\nReply 1, 2, or 3 to connect.']},
+};
+
+function sendWAMessage() {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+  chatInput.value='';
+  addBubble(msg,'s');
+  const resp = botResponses[msg] || {delay:1200,msgs:[`🤖 I understand "${msg}".\n\nPlease choose:\n1️⃣ Detect Crop Disease\n2️⃣ Weather Forecast\n3️⃣ Water Optimization\n4️⃣ Talk to Expert`]};
+  showTypingWA();
+  setTimeout(() => {
+    hideTypingWA();
+    const msgs = resp.msgs || [];
+    msgs.forEach((m,i) => {
+      const isObj = typeof m === 'object';
+      const delay = isObj ? m.delay : (i===0 ? 0 : 0);
+      setTimeout(() => {
+        if (isObj && m.loading) {
+          showTypingWA();
+        } else if (!isObj || !m.loading) {
+          hideTypingWA();
+          addBubble(typeof m==='object'?m.text:m, 'r');
+        }
+      }, delay);
+    });
+  }, resp.delay);
+}
+chatSend.addEventListener('click', sendWAMessage);
+chatInput.addEventListener('keydown', e => { if(e.key==='Enter') sendWAMessage(); });
+
+// ── TOAST ─────────────────────────────────────
+function showToast(msg) {
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => { t.classList.add('hide'); setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+// ── INIT ──────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => { document.getElementById('ndviBar').style.width = '73%'; }, 500);
+  setTimeout(() => { document.getElementById('donutFill').style.strokeDashoffset = circumference*(1-0.18); }, 700);
+});
+</script>
+</body>
+</html>
